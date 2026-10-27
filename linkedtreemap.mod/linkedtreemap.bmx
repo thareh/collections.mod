@@ -140,7 +140,7 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 
 	Rem
 	bbdoc: Adds a key/value pair to the #TLinkedTreeMap.
-	If the key already exists, updates the value.
+	about: If the key already exists, updates the value.
 	End Rem
 	Method Put:V(key:K, value:V) Override
 		Local node:TLinkedTreeMapNode<K,V> = FindNode(key)
@@ -233,9 +233,9 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 	End Method
 
 	Rem
-	bbdoc: Sets the maximum size of the map. If the current size exceeds maxSize,
-	the least-recently-used (or oldest) entries will be evicted.
-	about: A maxSize of 0 means the map is unbounded.
+	bbdoc: Sets the maximum size of the map.
+	about: If the current size exceeds maxSize, the least-recently-used (or oldest) entries will be evicted.
+	A maxSize of 0 means the map is unbounded.
 	End Rem
 	Method SetMaxSize(maxSize:Int)
 		_maxSize = maxSize
@@ -705,6 +705,11 @@ Type TLinkedTreeMapNode<K, V> Implements IMapNode<K,V>
 		Return value
 	End Method
 
+	Rem
+	bbdoc: Deconstructs this node into its key and value components.
+	param: Receives the key associated with this map entry.
+	param: Receives the value associated with this map entry.
+	End Rem
 	Method Deconstruct(keyOut:K Var, valueOut:V Var) Override
 		keyOut = key
 		valueOut = value
@@ -728,6 +733,12 @@ Type TLinkedTreeMapNode<K, V> Implements IMapNode<K,V>
 End Type
 
 
+Rem
+bbdoc: An iterator over the entries of a #TLinkedTreeMap.
+about: Yields #IMapNode instances in insertion or access order, matching the
+map's order mode. Modifying the underlying map while the iterator is active
+throws #TInvalidOperationException.
+End Rem
 Type TLinkedTreeMapIterator<K,V> Implements IIterator<IMapNode<K,V>>
 	Private
 	Field map:TLinkedTreeMap<K,V>
@@ -736,15 +747,28 @@ Type TLinkedTreeMapIterator<K,V> Implements IIterator<IMapNode<K,V>>
 	Field version:Int
 
 	Public
+	Rem
+	bbdoc: Creates a new entries iterator positioned before the first entry.
+	param: The #TLinkedTreeMap whose entries will be iterated.
+	End Rem
 	Method New(map:TLinkedTreeMap<K,V>)
 		Self.map = map
 		version = map._version
 	End Method
 
+	Rem
+	bbdoc: Returns the current element in the iteration.
+	End Rem
 	Method Current:IMapNode<K,V>()
 		Return node
 	End Method
 
+	Rem
+	bbdoc: Advances the iterator to the next element.
+	returns: #True if the iterator was successfully advanced; otherwise #False.
+	about: Throws #TInvalidOperationException if the underlying map was modified
+	after the iterator was created.
+	End Rem
 	Method MoveNext:Int()
 		If version <> map._version Then
 			Throw New TInvalidOperationException("Collection was modified during iteration")
@@ -766,27 +790,49 @@ Type TLinkedTreeMapIterator<K,V> Implements IIterator<IMapNode<K,V>>
 End Type
 
 
+Rem
+bbdoc: A read-only view of the keys contained in a #TLinkedTreeMap.
+about: Keys are exposed in the map's insertion or access order. The view
+reflects changes to the underlying map. Clearing the view is not supported.
+End Rem
 Type TLinkedTreeMapKeysView<K,V> Implements ICollection<K>
 	Private
 	Field _map:TLinkedTreeMap<K,V>
 
 	Public
+	Rem
+	bbdoc: Creates a keys view for the specified map.
+	param: The #TLinkedTreeMap whose keys are exposed by this view.
+	End Rem
 	Method New(map:TLinkedTreeMap<K,V>)
 		Self._map = map
 	End Method
 
+	Rem
+	bbdoc: Gets the number of keys in the view.
+	End Rem
 	Method Count:Int()
 		Return _map.Count()
 	End Method
 
+	Rem
+	bbdoc: Returns #True if the keys view is empty.
+	End Rem
 	Method IsEmpty:Int()
 		Return _map.IsEmpty()
 	End Method
 
+	Rem
+	bbdoc: Not supported. Throws #TUnsupportedOperationException.
+	End Rem
 	Method Clear()
 		UnsupportedOperationError()
 	End Method
 
+	Rem
+	bbdoc: Copies the keys into the supplied array starting at the given index.
+	about: Keys are copied in insertion or access order.
+	End Rem
 	Method CopyTo(arr:K[], index:Int = 0)
 		Local i:Int = index
 		Local n:TLinkedTreeMapNode<K,V> = _map._head
@@ -797,12 +843,20 @@ Type TLinkedTreeMapKeysView<K,V> Implements ICollection<K>
 		Wend
 	End Method
 
+	Rem
+	bbdoc: Returns an iterator over the keys.
+	End Rem
 	Method GetIterator:IIterator<K>()
 		Return New TLinkedTreeMapKeysIterator<K,V>(_map)
 	End Method
 End Type
 
 
+Rem
+bbdoc: An iterator over the keys of a #TLinkedTreeMap.
+about: Keys are yielded in insertion or access order. Modifying the underlying
+map while the iterator is active throws #TInvalidOperationException.
+End Rem
 Type TLinkedTreeMapKeysIterator<K,V> Implements IIterator<K>
 	Private
 	Field _map:TLinkedTreeMap<K,V>
@@ -812,15 +866,28 @@ Type TLinkedTreeMapKeysIterator<K,V> Implements IIterator<K>
 	Field _current:K
 
 	Public
+	Rem
+	bbdoc: Creates a new keys iterator positioned before the first key.
+	param: The #TLinkedTreeMap whose keys will be iterated.
+	End Rem
 	Method New(map:TLinkedTreeMap<K,V>)
 		Self._map = map
 		_version = map._version
 	End Method
 
+	Rem
+	bbdoc: Returns the current key in the iteration.
+	End Rem
 	Method Current:K()
 		Return _current
 	End Method
 
+	Rem
+	bbdoc: Advances the iterator to the next key.
+	returns: #True if the iterator was successfully advanced; otherwise #False.
+	about: Throws #TInvalidOperationException if the underlying map was modified
+	after the iterator was created.
+	End Rem
 	Method MoveNext:Int()
 		If _version <> _map._version Then
 			Throw New TInvalidOperationException("Collection was modified during iteration")
@@ -845,27 +912,50 @@ Type TLinkedTreeMapKeysIterator<K,V> Implements IIterator<K>
 End Type
 
 
+Rem
+bbdoc: A read-only view of the values contained in a #TLinkedTreeMap.
+about: Values are exposed in the map's insertion or access order. The view
+reflects changes to the underlying map. Clearing the view is not supported.
+Values are not required to be unique.
+End Rem
 Type TLinkedTreeMapValuesView<K,V> Implements ICollection<V>
 	Private
 	Field _map:TLinkedTreeMap<K,V>
 
 	Public
+	Rem
+	bbdoc: Creates a values view for the specified map.
+	param: The #TLinkedTreeMap whose values are exposed by this view.
+	End Rem
 	Method New(map:TLinkedTreeMap<K,V>)
 		Self._map = map
 	End Method
 
+	Rem
+	bbdoc: Gets the number of values in the view.
+	End Rem
 	Method Count:Int()
 		Return _map.Count()
 	End Method
 
+	Rem
+	bbdoc: Returns #True if the values view is empty.
+	End Rem
 	Method IsEmpty:Int()
 		Return _map.IsEmpty()
 	End Method
 
+	Rem
+	bbdoc: Not supported. Throws #TUnsupportedOperationException.
+	End Rem
 	Method Clear()
 		UnsupportedOperationError()
 	End Method
 
+	Rem
+	bbdoc: Copies the values into the supplied array starting at the given index.
+	about: Values are copied in insertion or access order.
+	End Rem
 	Method CopyTo(array:V[], index:Int = 0)
 		Local i:Int = index
 		Local n:TLinkedTreeMapNode<K,V> = _map._head
@@ -876,12 +966,20 @@ Type TLinkedTreeMapValuesView<K,V> Implements ICollection<V>
 		Wend
 	End Method
 
+	Rem
+	bbdoc: Returns an iterator over the values.
+	End Rem
 	Method GetIterator:IIterator<V>()
 		Return New TLinkedTreeMapValuesIterator<K,V>(_map)
 	End Method
 End Type
 
 
+Rem
+bbdoc: An iterator over the values of a #TLinkedTreeMap.
+about: Values are yielded in insertion or access order. Modifying the underlying
+map while the iterator is active throws #TInvalidOperationException.
+End Rem
 Type TLinkedTreeMapValuesIterator<K,V> Implements IIterator<V>
 	Private
 	Field _map:TLinkedTreeMap<K,V>
@@ -891,15 +989,28 @@ Type TLinkedTreeMapValuesIterator<K,V> Implements IIterator<V>
 	Field _current:V
 
 	Public
+	Rem
+	bbdoc: Creates a new values iterator positioned before the first value.
+	param: The #TLinkedTreeMap whose values will be iterated.
+	End Rem
 	Method New(map:TLinkedTreeMap<K,V>)
 		Self._map = map
 		_version = map._version
 	End Method
 
+	Rem
+	bbdoc: Returns the current value in the iteration.
+	End Rem
 	Method Current:V()
 		Return _current
 	End Method
 
+	Rem
+	bbdoc: Advances the iterator to the next value.
+	returns: #True if the iterator was successfully advanced; otherwise #False.
+	about: Throws #TInvalidOperationException if the underlying map was modified
+	after the iterator was created.
+	End Rem
 	Method MoveNext:Int()
 		If _version <> _map._version Then
 			Throw New TInvalidOperationException("Collection was modified during iteration")
