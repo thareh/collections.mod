@@ -62,14 +62,23 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		_maxSize = maxSize
 	End Method
 
+	Rem
+	bbdoc: Gets the number of key/value pairs contained in the #TLinkedTreeMap.
+	End Rem
 	Method Count:Int() Override
 		Return size
 	End Method
 
+	Rem
+	bbdoc: Returns #True if the #TLinkedTreeMap is empty, otherwise #False.
+	End Rem
 	Method IsEmpty:Int() Override
 		Return size = 0
 	End Method
 
+	Rem
+	bbdoc: Removes all elements from the #TLinkedTreeMap.
+	End Rem
 	Method Clear() Override
 		root = Null
 		size = 0
@@ -78,10 +87,16 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		_version :+ 1
 	End Method
 
+	Rem
+	bbdoc: Returns an iterator that iterates through the #TLinkedTreeMap in insertion or access order.
+	End Rem
 	Method GetIterator:IIterator<IMapNode<K,V>>()
 		Return New TLinkedTreeMapIterator<K,V>(Self)
 	End Method
 
+	Rem
+	bbdoc: Returns the #TLinkedTreeMap keys as a collection (in insertion or access order).
+	End Rem
 	Method Keys:ICollection<K>() Override
 		If size = 0 Then
 			Return New TEmptyImmutableList<K>
@@ -89,6 +104,9 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Return New TLinkedTreeMapKeysView<K,V>(Self)
 	End Method
 
+	Rem
+	bbdoc: Returns the #TLinkedTreeMap values as a collection (in insertion or access order).
+	End Rem
 	Method Values:ICollection<V>() Override
 		If size = 0 Then
 			Return New TEmptyImmutableList<V>
@@ -96,6 +114,9 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Return New TLinkedTreeMapValuesView<K,V>(Self)
 	End Method
 
+	Rem
+	bbdoc: Copies the elements of the #TLinkedTreeMap to an array, starting at a particular array index.
+	End Rem
 	Method CopyTo(array:IMapNode<K,V>[], index:Int = 0)
 		Local i:Int = index
 		Local n:TLinkedTreeMapNode<K,V> = _head
@@ -106,6 +127,10 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Wend
 	End Method
 
+	Rem
+	bbdoc: Adds the specified key and value to the #TLinkedTreeMap.
+	about: Throws an exception if an element with the specified key already exists.
+	End Rem
 	Method Add(key:K, value:V) Override
 		If FindNode(key) Then
 			Throw New TArgumentException("An element with the same key already exists in the map")
@@ -113,6 +138,10 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		_AddNew(key, value)
 	End Method
 
+	Rem
+	bbdoc: Adds a key/value pair to the #TLinkedTreeMap.
+	If the key already exists, updates the value.
+	End Rem
 	Method Put:V(key:K, value:V) Override
 		Local node:TLinkedTreeMapNode<K,V> = FindNode(key)
 		If node Then
@@ -129,10 +158,19 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Return def
 	End Method
 
+	Rem
+	bbdoc: Determines whether the #TLinkedTreeMap contains the specified key.
+	End Rem
 	Method ContainsKey:Int(key:K) Override
 		Return FindNode(key) <> Null
 	End Method
 
+	Rem
+	bbdoc: Gets the value associated with the specified key.
+	about: Returns #True if the key was found; otherwise, #False.
+	@value is set to the value associated with the key when found.
+	In access-order mode, retrieving a value marks the entry as most recently used.
+	End Rem
 	Method TryGetValue:Int(key:K, value:V Var)
 		Local node:TLinkedTreeMapNode<K,V> = FindNode(key)
 		If node <> Null Then
@@ -143,6 +181,10 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Return False
 	End Method
 
+	Rem
+	bbdoc: Gets the element with the specified key.
+	about: In access-order mode, retrieving a value marks the entry as most recently used.
+	End Rem
 	Method Operator [] :V(key:K)
 		Local node:TLinkedTreeMapNode<K,V> = FindNode(key)
 		If node Then
@@ -154,10 +196,16 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Return def
 	End Method
 
+	Rem
+	bbdoc: Sets the element with the specified key.
+	End Rem
 	Method Operator []= (key:K, value:V)
 		Put(key, value)
 	End Method
 
+	Rem
+	bbdoc: Removes the value with the specified key from the #TLinkedTreeMap.
+	End Rem
 	Method Remove:Int(key:K) Override
 		Local node:TLinkedTreeMapNode<K,V> = FindNode(key)
 		If node = Null Then
@@ -170,6 +218,9 @@ Type TLinkedTreeMap<K, V> Implements IMap<K, V>
 		Return True
 	End Method
 
+	Rem
+	bbdoc: Determines whether the #TLinkedTreeMap contains a specific value.
+	End Rem
 	Method ContainsValue:Int(value:V)
 		Local n:TLinkedTreeMapNode<K,V> = _head
 		While n
@@ -640,10 +691,16 @@ Type TLinkedTreeMapNode<K, V> Implements IMapNode<K,V>
 
 	Public
 
+	Rem
+	bbdoc: Returns the key for this node.
+	End Rem
 	Method GetKey:K() Override
 		Return key
 	End Method
 
+	Rem
+	bbdoc: Returns the value for this node.
+	End Rem
 	Method GetValue:V() Override
 		Return value
 	End Method
@@ -654,10 +711,16 @@ Type TLinkedTreeMapNode<K, V> Implements IMapNode<K,V>
 	End Method
 
 	' Iteration follows the linked list (insertion/access order), not tree order.
+	Rem
+	bbdoc: Returns #True if there is a next node in insertion/access order.
+	End Rem
 	Method HasNext:Int() Override
 		Return _next <> Null
 	End Method
 
+	Rem
+	bbdoc: Returns the next node in insertion/access order.
+	End Rem
 	Method NextNode:IMapNode<K,V>() Override
 		Return _next
 	End Method
